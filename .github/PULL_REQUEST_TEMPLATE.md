@@ -1,10 +1,10 @@
-## Mục tiêu
-<!-- Mô tả thay đổi -->
+## Mục đích
+<!-- tóm tắt thay đổi -->
 
-## Cách kiểm thử
-<!-- Hướng dẫn reviewer test -->
+## Cách test
+<!-- bước chạy, dữ liệu mẫu -->
 
 ## Checklist
-- [ ] Code build & test OK
-- [ ] Có review từ 1 dev khác
-- [ ] Đã cập nhật tài liệu nếu cần
+- [ ] Lint/Build OK
+- [ ] Có unit/integration test
+- [ ] Đã cập nhật docs/README nếu cần
