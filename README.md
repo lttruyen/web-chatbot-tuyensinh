@@ -1,2 +1,2 @@
-# web-muontra-thietbi
-Web quản lý mượn/trả thiết bị nhân sự
+# web-chatbot-tuyensinh
+Web chatbot tư vấn tuyển sinh
