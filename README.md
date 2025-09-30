@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-# web-chatbot-tuyensinh
-Web chatbot tư vấn tuyển sinh
-=======
+
 # Web Chatbot Tuyển Sinh
 
 Dự án xây dựng hệ thống chatbot hỗ trợ tuyển sinh, phát triển trên nền tảng **Laravel**.
