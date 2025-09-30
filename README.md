@@ -2,61 +2,79 @@
 # web-chatbot-tuyensinh
 Web chatbot tư vấn tuyển sinh
 =======
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Web Chatbot Tuyển Sinh
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Dự án xây dựng hệ thống chatbot hỗ trợ tuyển sinh, phát triển trên nền tảng **Laravel**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 1. Cài đặt Laravel
+- Cài đặt Laravel bằng Composer:  
+  ```bash
+  composer create-project laravel/laravel tvuchatbot
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Cấu hình môi trường trong file .env (database, mail, key...).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Chạy server nội bộ:
 
-## Learning Laravel
+php artisan serve
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 2. Xây dựng Database
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Cấu hình kết nối trong file .env:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=tvuchatbot
+DB_USERNAME=root
+DB_PASSWORD=
 
-## Laravel Sponsors
+Tạo migration và migrate dữ liệu:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+php artisan make:migration create_users_table
+php artisan migrate
 
-### Premium Partners
+## 3. Tạo các model
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Tạo model theo đường dẫn app/Models/:
 
-## Contributing
+php artisan make:model TênModel
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-## Code of Conduct
+## 4. Quản lý API key
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Controller: ApiKeyController.php:
++ Hàm index() dùng để gọi lại view;
++ Hàm store() dùng để xử lý thêm API key mới vào DB;
++ Hàm update() dùng để cập nhật API key;
++ Hàm destroy() dùng để xóa API key;
+- View : api/index.blade.php
+- route: 
+- Route::prefix('api')->group(function () {
+    Route::get('/', [ApiKeyController::class, 'index'])->name('api.index')->middleware('session.role:admin,dev');
+}); // tuyến đường giao diện trang quản lý api
+- api xử lý:
++ Route::post('/api-key', [ApiKeyController::class, 'store']); // Phần thêm mới api-key
++ Route::post('/api-key/update', [ApiKeyController::class, 'update']); // Phần cập nhật api-key 
++ Route::delete('/api-key/{id}', [ApiKeyController::class, 'destroy']); // Phần xóa api-key 
 
-## Security Vulnerabilities
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 5. Quản lý SMTP
+
+- Controller: settingController.php
++ Hàm index() dùng để gọi lại view;
++ Hàm store() dùng để thêm smtp;
++ Hàm updateByRequest() dùng để cập nhật smtp;
++ Hàm destroy() dùng để xóa smtp; 
+- View: admin/smtp.blade.php
+- route: Route::prefix('smtp')->group(function () {
+    Route::get('/', [settingController::class, 'index'])->name('smtp.index')->middleware('session.role:admin,dev');
+}); //tuyến đường giao diện trang quản lý api
+- api xử lý: 
+- Route::post('/smtp', [settingController::class, 'store']); // phần thêm smtp
+- Route::post('/smtp/update', [settingController::class, 'updateByRequest']); // phần cập nhật smtp
+- Route::delete('smtp/{id}', [settingController::class, 'destroy']); // Xóa smtp
+
+
 
