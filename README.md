@@ -74,4 +74,51 @@ php artisan make:model TênModel
 - Route::delete('smtp/{id}', [settingController::class, 'destroy']); // Xóa smtp
 
 
+## 6. Quản lý câu hỏi / trả lời
+
+- Controller: ApiXuLyController.php
++ Ngoại trừ các hàm dành cho quản lý tài khoản truy cập, còn lại điều hỗ trợ cho chức năng quản lý câu hỏi và câu trả lời.
+- View: account/chat.blade.php
+- route:
+- api xử lý:
++ Route::post('/add-qa', [ApiXuLyController::class, 'add']); // Thêm mới câu hỏi, câu trả lời 
++ Route::post('/update-qa', [ApiXuLyController::class, 'update']);  // Cập nhật câu hỏi, câu trả lời
+Route::delete('/xoa-qa/{id1}/{id2}', [ApiXuLyController::class, 'deleteCauHoi']); // Xóa câu hỏi, câu trả lời
+
+
+## 7. Giao diện trang Chatbot
+
+- Controller: ChatController.php
+Cuối controller này có hàm deleteTLTam dùng để xóa câu trả lời tạm 
+- View: index.blade.php file ở ngoài cùng
+- route:
+Route::get('/', function () {return view('index');})->name('trangchu'); trang chủ giao diện chatbot
+- api xử lý:
++ Route::post('/chat', [ChatController::class, 'chat']); //xử lý chat
++ Route::delete('/cau-tra-loi-tam/{id}', [ChatController::class, 'deleteTLTam']); // xử lý xóa câu trả lời tạm
+
+
+## 8. Quản lý người dùng
+
+- Controller: nguoiDungController;
++ Hàm index() dùng để gọi lại view;
++ Hàm store() dùng để thêm mới người dùng hàm này dùng ngay giao diện chat của chat bot;
++ Hàm export() dùng để export file excel thông tin người dùng.
+- View: admin/user.blade.php
+- route: Route::prefix('user')->group(function () {
+    Route::get('/', [nguoiDungController::class, 'index'])->name('user.index')->middleware('session.role:admin,dev');
+}); Xử lý lưu thông tin người dùng
+- api xử lý: 
++ Route::get('/xuat-nguoi-dung', [nguoiDungController::class, 'export']); // xuất thông tin người dùng sang file excel
++ Route::post('/luu-nguoi-dung', [nguoiDungController::class, 'store']); //xử lý lưu thông tin người dùng
++ Route::get('/cuoc-hoi-thoai', [nguoiDungController::class, 'showLog'])->name('api.log.cauhoi'); // Lọc câu hỏi theo người dùng 
+
+
+## 9. Gửi email
+
+- Controller: EmailController.php
++ Hàm sendBulk(): dùng để xử lý gửi mail, nhận request từ trang quản lý người dùng;
+- api xử lý: 
+- Route::post('/gui-email', [EmailController::class, 'sendBulk'])->name('api.gui-email'); //api gửi mail 
+
 
