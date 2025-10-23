@@ -14,6 +14,8 @@ use App\Models\CuocHoiThoai;
 use App\Models\CauHoi;
 use App\Models\CauTraLoiTam;
 use App\Models\LogCauHoi;
+use HTMLPurifier;
+use HTMLPurifier_Config;
 // Phần render HTML 
 // use League\CommonMark\Environment\Environment;
 // use League\CommonMark\CommonMarkConverter;
@@ -21,6 +23,8 @@ use App\Models\LogCauHoi;
 // use League\CommonMark\Extension\Autolink\AutolinkExtension;
 // use League\CommonMark\Extension\Strikethrough\StrikethroughExtension;
 // use League\CommonMark\Extension\DisallowedRawHtml\DisallowedRawHtmlExtension;
+
+
 
 class ChatController extends Controller
 {
@@ -899,6 +903,9 @@ class ChatController extends Controller
     private function purifyHtml(string $html): string
     {
         $config = \HTMLPurifier_Config::createDefault();
+
+        $config->set('Cache.SerializerPath', storage_path('app/purifier'));
+        $config->set('Cache.SerializerPermissions', 0755);
 
         $config->set('HTML.Allowed', implode(',', [
             'p,div,span,ul,ol,li,br,hr,blockquote,pre,code',

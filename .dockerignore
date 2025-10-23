@@ -1,0 +1,11 @@
+.git
+.gitignore
+node_modules
+vendor
+storage/*.key
+storage/logs/*
+bootstrap/cache/*.php
+*.env
+.env.*.local
+.env.local
+docker-compose.override.yml
