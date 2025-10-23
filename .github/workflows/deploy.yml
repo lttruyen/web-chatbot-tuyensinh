@@ -2,8 +2,8 @@ name: Deploy to VPS on push to main
 
 on:
   push:
-    branches: [ main ]      # Tự động chạy khi có commit/merge vào main
-  workflow_dispatch: {}     # Cho phép chạy thủ công từ tab Actions
+    branches: [ main ]
+  workflow_dispatch: {}
 
 concurrency:
   group: deploy-main
@@ -12,14 +12,13 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: SSH into VPS and deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.VPS_HOST }}            # ví dụ 103.x.x.x
-          username: ${{ secrets.VPS_USER }}        # root (hoặc user deploy)
-          key: ${{ secrets.VPS_SSH_KEY }}          # private key OpenSSH
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             set -e
             cd "${APP_DIR:-/root/tvuchatbot}"
@@ -29,21 +28,18 @@ jobs:
             git reset --hard origin/main
 
             echo "[2/6] Build Docker image(s)"
-            # Bạn đang có Docker Compose v2, dùng lệnh 'docker compose'
             docker compose build --no-cache app
 
             echo "[3/6] Restart containers"
             docker compose up -d --remove-orphans
 
             echo "[4/6] Laravel optimize & cache"
-            # -T: không yêu cầu TTY khi chạy trong môi trường CI
             docker compose exec -T app php artisan optimize:clear
             docker compose exec -T app php artisan config:cache
             docker compose exec -T app php artisan route:cache
 
             echo "[5/6] Run migrations"
-            # Nếu DB lên chậm, có thể mở sleep
-            # sleep 5
+            # sleep 5  # bật nếu DB khởi động chậm
             docker compose exec -T app php artisan migrate --force
 
             echo "[6/6] ✅ Deploy completed successfully!"
