@@ -63,7 +63,7 @@
 <body>
     <div class="wrapper">
         <div class="header">
-            <img src="{{ asset('img/logo3.png') }}" alt="AI Bot" />
+            <img src="{{ asset('img/logo5.png') }}" alt="AI Bot" />
             <div class="header-text">
                 <h2>AI Chatbot Tuyển Sinh xin chào!</h2>
                 <p>Bạn đang tương tác với trợ lý AI để tìm hiểu thông tin tuyển sinh. Đặt câu hỏi để được hỗ trợ nhé!
