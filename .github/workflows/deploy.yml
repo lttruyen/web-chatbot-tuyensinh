@@ -2,13 +2,8 @@ name: Deploy to VPS on push to main
 
 on:
   push:
-    branches: [ main ]     # Tự deploy khi có code mới vào main
-  workflow_dispatch:
-    inputs:
-      fresh:
-        description: "Run migrate:fresh --seed --force (⚠️ XÓA TOÀN BỘ BẢNG)"
-        required: false
-        default: "false"
+    branches: [ main ]
+  workflow_dispatch: {}     # cho phép chạy tay khi cần (vẫn không chạm DB)
 
 concurrency:
   group: deploy-main
@@ -17,9 +12,8 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: SSH into VPS and deploy
+      - name: SSH into VPS and deploy (no-DB)
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -28,52 +22,23 @@ jobs:
           script_stop: true
           script: |
             set -Eeuo pipefail
-
             APP_DIR="${APP_DIR:-/root/tvuchatbot}"
-            echo "[0/9] cd $APP_DIR"
+            echo "[1/4] cd $APP_DIR"
             cd "$APP_DIR"
 
-            echo "[1/9] Pull latest main"
+            echo "[2/4] Pull latest main"
             git fetch --all
             git reset --hard origin/main
 
-            echo "[2/9] Build Docker image(s)"
+            echo "[3/4] Build & restart containers"
             docker compose build --no-cache app
-
-            echo "[3/9] Up containers"
             docker compose up -d --remove-orphans
 
-            echo "[4/9] Laravel optimize & cache"
+            echo "[4/4] Laravel optimize (no DB touch)"
             docker compose exec -T app php artisan optimize:clear
             docker compose exec -T app php artisan config:cache
             docker compose exec -T app php artisan route:cache
 
-            echo "[5/9] Run migrations (SAFE: no drop)"
-            docker compose exec -T app php artisan migrate --force || {
-              echo "⚠️ migrate --force lỗi, giữ nguyên DB"; 
-            }
-
-            if [ "${{ github.event.inputs.fresh }}" = "true" ]; then
-              # ⚠️ CHỐNG XÓA DỮ LIỆU Ở PRODUCTION
-              if [ "${{ secrets.APP_ENV }}" = "production" ]; then
-                echo "❌ Không được phép chạy migrate:fresh trong môi trường production"
-                exit 1
-              fi
-
-              echo "[6/9] ⚠️ fresh requested via manual workflow_dispatch"
-              echo "      → Backup DB trước khi fresh"
-
-              TS="$(date +'%Y%m%d_%H%M%S')"
-              docker compose exec -T db sh -lc 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"' > "backup_${TS}.sql"
-              echo "✅ Backup saved: backup_${TS}.sql"
-
-              echo "[7/9] Running migrate:fresh --seed --force (DROPS ALL TABLES)"
-              docker compose exec -T app php artisan migrate:fresh --seed --force
-            fi
-
-            echo "[8/9] Show running services"
-            docker compose ps
-
-            echo "[9/9] ✅ Deploy completed successfully!"
+            echo "✅ Deploy completed (no database changes)."
         env:
           APP_DIR: ${{ secrets.APP_DIR }}
