@@ -49,12 +49,17 @@ jobs:
             docker compose exec -T app php artisan route:cache
 
             echo "[5/9] Run migrations (SAFE: no drop)"
-            # Không xoá dữ liệu nếu migrate lỗi
             docker compose exec -T app php artisan migrate --force || {
               echo "⚠️ migrate --force lỗi, giữ nguyên DB"; 
             }
 
             if [ "${{ github.event.inputs.fresh }}" = "true" ]; then
+              # ⚠️ CHỐNG XÓA DỮ LIỆU Ở PRODUCTION
+              if [ "${{ secrets.APP_ENV }}" = "production" ]; then
+                echo "❌ Không được phép chạy migrate:fresh trong môi trường production"
+                exit 1
+              fi
+
               echo "[6/9] ⚠️ fresh requested via manual workflow_dispatch"
               echo "      → Backup DB trước khi fresh"
 
